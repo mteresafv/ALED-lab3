@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html","k":"18"},{"p":"es.upm.dit.aled.lab3","l":"FASTAReader"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html","k":"18"},{"p":"es.upm.dit.aled.lab3","l":"FASTAException","k":"13"},{"p":"es.upm.dit.aled.lab3","l":"FASTAReader"},{"p":"es.upm.dit.aled.lab3.binary","l":"FASTAReaderSuffixes"},{"p":"es.upm.dit.aled.lab3.binary","l":"Suffix"},{"p":"es.upm.dit.aled.lab3.binary","l":"SuffixComparator"}];updateSearchResults();
