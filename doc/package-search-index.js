@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"es.upm.dit.aled.lab3"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"es.upm.dit.aled.lab3"},{"l":"es.upm.dit.aled.lab3.binary"}];updateSearchResults();
