@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,10 +20,10 @@ import java.util.List;
  *
  */
 public class FASTAReader {
-
-	protected byte[] content;
-	protected int validBytes;
-
+	// pattern = secuencia
+	protected byte[] content; // genoma
+	protected int validBytes; // última posición disponible dentro de mi genoma
+	//creo un array con un tamaño mayor al del genoma
 	/**
 	 * Creates a new FASTAReader from a FASTA file.
 	 * 
@@ -117,16 +118,16 @@ public class FASTAReader {
 	 * Returns true if the pattern is present at the given position; false
 	 * otherwise.
 	 */
-	private boolean compare(byte[] pattern, int position) throws FASTAException {
+	private boolean compare(byte[] pattern, int position) throws FASTAException { // pattern, es lo que buscamos nosotros, es una secuencia
 		if (position + pattern.length > validBytes) {
-			throw new FASTAException("Pattern goes beyond the end of the file.");
+			throw new FASTAException("Pattern goes beyond the end of the file."); //lanza una exception cuando me salgo del tamaño
 		}
 		boolean match = true;
 		for (int i = 0; i < pattern.length; i++) {
-			if (pattern[i] != content[position + i]) {
-				match = false;
+			if (pattern[i] != content[position + i]) { // 
+				match = false; // cuando son diferentes los caracteres
 			}
-		}
+		} //pasándole el patrón y una posicion, a partir de esa posicion busca.
 		return match;
 	}
 
@@ -136,7 +137,17 @@ public class FASTAReader {
 	 */
 	private boolean compareImproved(byte[] pattern, int position) throws FASTAException {
 		// TODO
-		return false;
+		
+		if (position + pattern.length > validBytes) {
+			throw new FASTAException("Pattern goes beyond the end of the file.");
+		}
+		boolean match = true;
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) { // 
+				return false; // esto es lo "improved", hacemos el return y así ahorramos pasos
+			}
+		} 
+		return match;
 	}
 
 	/*
@@ -149,7 +160,18 @@ public class FASTAReader {
 	 */
 	private int compareNumErrors(byte[] pattern, int position) throws FASTAException {
 		// TODO
-		return -1;
+		
+		if (position + pattern.length > validBytes) {
+			throw new FASTAException("Pattern goes beyond the end of the file.");
+		}
+		int numErrors = 0;
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) { // 
+				//numErrors = numErrors +1;
+				numErrors++;
+			}
+		} 
+		return numErrors;
 	}
 
 	/**
@@ -160,10 +182,29 @@ public class FASTAReader {
 	 * @param pattern The pattern to be found.
 	 * @return All the positions of the first character of every occurrence of the
 	 *         pattern in the data.
+	 * @throws FASTAException 
 	 */
-	public List<Integer> search(byte[] pattern) {
+	//public List<Integer> search(byte[] pattern) throws FASTAException {  // añadimos el throws, fuerza la excepción, pero así da error en el main, por lo tanto, optamos por poner un try catch
+	public List<Integer> search(byte[] pattern) {	
 		// TODO
-		return null;
+		List<Integer> res = new ArrayList<>();
+		
+		// comparar todos los caracteres de mi patrón con los del genoma que estoy buscando
+		//for(int i = 0; i < content.length; i++){ // recorrer el genoma, no es pattern lo que queremos recorrer
+		// complejidad O(n):
+		for(int i = 0; i < validBytes - 1; i++){ //es necesario poner el -1
+			try {
+				if (compareImproved(pattern, i)) { // un if es un boolean
+				//if (compare(pattern, i)) { // posicion i q es la q toca en cada momento y el pattern q es lo q espera recibir
+					// si la comparación da true, se añade a la lista
+					res.add(i); 
+				}
+			} catch (FASTAException e) {
+				break;
+			}
+		}
+		
+		return res; // devuelve una lista q contiene posiciones, donde en genoma he encontrado
 	}
 
 	/**
@@ -180,7 +221,22 @@ public class FASTAReader {
 	 */
 	public List<Integer> searchSNV(byte[] pattern) {
 		// TODO
-		return null;
+		
+		List<Integer> res = new ArrayList<>();
+		
+		
+		for(int i = 0; i < validBytes - 1; i++){ //es necesario poner el -1
+			try {
+				if (compareNumErrors(pattern, i) == 0 || compareNumErrors(pattern, i) == 1) {
+				// if (compareNumErrors(pattern, i) <= 1){
+					res.add(i); 
+				}
+			} catch (FASTAException e) {
+				break;
+			}
+		}
+		
+		return res;
 	}
 
 	public static void main(String[] args) {
@@ -190,7 +246,8 @@ public class FASTAReader {
 			return;
 		System.out.println("Tiempo de apertura de fichero: " + (System.nanoTime() - t1));
 		long t2 = System.nanoTime();
-		List<Integer> posiciones = reader.search(args[1].getBytes());
+		// List<Integer> posiciones = reader.search(args[1].getBytes()); // usa el otro search
+		List<Integer> posiciones = reader.searchSNV(args[1].getBytes());
 		System.out.println("Tiempo de búsqueda: " + (System.nanoTime() - t2));
 		if (posiciones.size() > 0) {
 			for (Integer pos : posiciones)
